@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libro de Graduación</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Libre+Baskerville:wght@400;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #1a1614;
+            background-image: 
+                linear-gradient(135deg, #2c2420 0%, #1a1614 100%),
+                url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none" stroke="%23d4af3720" stroke-width="0.5"/></svg>');
+            font-family: 'Libre Baskerville', serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .libro-container {
+            perspective: 2500px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .libro {
+            position: relative;
+            width: 100%;
+            height: 750px;
+            transform-style: preserve-3d;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+        }
+
+        .pagina {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #fdfcf8;
+            background-image: 
+                linear-gradient(to bottom, transparent 0%, rgba(212,175,55,0.03) 100%),
+                url('data:image/svg+xml,<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4"/></filter><rect width="200" height="200" filter="url(%23noise)" opacity="0.03"/></svg>');
+            border-radius: 3px 8px 8px 3px;
+            box-shadow: inset 2px 0 15px rgba(0,0,0,0.1);
+            padding: 45px 40px;
+            transform-origin: left center;
+            transition: transform 1s cubic-bezier(0.645, 0.045, 0.355, 1);
+            backface-visibility: hidden;
+            overflow-y: auto;
+            border-left: 3px solid #8b7355;
+            display: none;
+        }
+
+        .pagina.activa {
+            display: block;
+            z-index: 10;
+        }
+
+        .pagina::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            opacity: 0.3;
+        }
+
+        /* PORTADA FORMAL */
+        .portada {
+            background: #0a0806;
+            background-image: 
+                radial-gradient(ellipse at center, #1a1410 0%, #0a0806 100%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(212,175,55,0.03) 2px, rgba(212,175,55,0.03) 4px);
+            color: #d4af37;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-left: 3px solid #d4af37;
+        }
+
+        .portada::before {
+            content: '';
+            position: absolute;
+            inset: 25px;
+            border: 2px solid #d4af37;
+            border-radius: 2px;
+            pointer-events: none;
+            box-shadow: inset 0 0 20px rgba(212,175,55,0.1);
+        }
+
+        .portada::after {
+            content: '';
+            position: absolute;
+            inset: 35px;
+            border: 1px solid #d4af3760;
+            pointer-events: none;
+        }
+
+        .birrete {
+            font-size: 4.5rem;
+            margin-bottom: 35px;
+            filter: drop-shadow(0 6px 12px rgba(212, 175, 55, 0.4));
+        }
+
+        .titulo-portada {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            color: #d4af37;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+            line-height: 1.6;
+            padding: 0 30px;
+            margin-bottom: 40px;
+            white-space: pre-line;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .ornamento {
+            width: 120px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            margin: 20px 0;
+        }
+
+        .contenido-pagina h2 {
+            font-family: 'Cormorant Garamond', serif;
+            color: #8b7355;
+            font-size: 2rem;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #d4af3750;
+            padding-bottom: 10px;
+        }
+
+        .contenido-pagina p {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: #2c2420;
+            text-align: justify;
+            white-space: pre-line;
+            text-indent: 2em;
+        }
+
+        /* 2 FOTOS POR PÁGINA - ESTILO FORMAL */
+        .bloque-foto {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ffffff;
+            border: 1px solid #d4af3740;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .bloque-foto:last-child {
+            margin-bottom: 10px;
+        }
+
+        .titulo-foto {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            color: #8b7355;
+            text-align: center;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        .bloque-foto img {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+            margin: 12px 0;
+            border: 3px solid #d4af37;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            filter: sepia(10%);
+        }
+
+        .texto-foto {
+            text-align: center;
+            font-size: 1rem;
+            color: #2c2420;
+            margin-top: 10px;
+            font-weight: 400;
+            line-height: 1.7;
+            font-style: italic;
+        }
+
+        .texto-final {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            color: #2c2420;
+            text-align: center;
+            margin-top: 25px;
+            padding: 25px;
+            background: #ffffff;
+            border: 2px solid #d4af37;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            white-space: pre-line;
+        }
+
+        .flecha-siguiente, .flecha-anterior {
+            position: absolute;
+            bottom: 25px;
+            width: 50px;
+            height: 50px;
+            background: #8b7355;
+            border: 2px solid #d4af37;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            z-index: 20;
+            user-select: none;
+        }
+
+        .flecha-siguiente:hover, .flecha-anterior:hover {
+            background: #6b5a45;
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        }
+
+        .flecha-siguiente { right: 25px; }
+        .flecha-anterior { left: 25px; }
+
+        .flecha-siguiente::after {
+            content: '→';
+            color: #d4af37;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .flecha-anterior::after {
+            content: '←';
+            color: #d4af37;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .numero-pagina {
+            position: absolute;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #8b7355;
+            font-size: 0.95rem;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .pagina::-webkit-scrollbar { width: 8px; }
+        .pagina::-webkit-scrollbar-track { background: #f5f5f0; }
+        .pagina::-webkit-scrollbar-thumb {
+            background: #8b7355;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="libro-container">
+        <div class="libro" id="libro">
+            
+            <!-- PORTADA FORMAL -->
+            <div class="pagina portada activa" data-pagina="0">
+                <div class="birrete">🎓</div>
+                <div class="ornamento"></div>
+                <h1 class="titulo-portada">PARA MIS AMIGOS
+               Y
+        MAESTRA</h1>
+                <div class="ornamento"></div>
+                <div class="flecha-siguiente" id="btn-siguiente-0"></div>
+            </div>
+
+            <!-- PÁGINA 1 - DEDICATORIA -->
+            <div class="pagina" data-pagina="1">
+                <div class="contenido-pagina">
+                    <h2>Dedicatoria</h2>
+                    <p>Felicidades a todos ustedes, son más que mis amigos todos, incluidos hasta con los que no hablo. Los voy a extrañar un montón a todos, fue algo muy maravilloso para mí conocerlos a todos. Me encariñé tanto con ustedes que ya no me quiero graduar. Pero pues así es la vida, aún estamos jóvenes nos queda mucho por delante. De verdad me da emoción verlos a todos graduados, quiero verlos a todos cumplír sus sueños y todo. Los voy a extrañar un montón sinceramente se los digo. No acostumbro a hablar así pero a ustedes les tengo un cariño enorme. Tuvimos momentos muy felices y otros no tan felices pero pues eso pasa. Échenle ganas a la escuela plebes quiero verlos con cumplir sus metas y sueños.
+
+Este no es un adiós, es un hasta luego. Muchas felicidades.</p>
+                </div>
+                <div class="flecha-anterior" id="btn-anterior-1"></div>
+                <div class="flecha-siguiente" id="btn-siguiente-1"></div>
+                <div class="numero-pagina">1</div>
+            </div>
+
+            <!-- MAESTRA PÁGINA 1: 2 FOTOS -->
+            <div class="pagina" data-pagina="2">
+                <div class="contenido-pagina">
+                    <h2>A Mi Maestra</h2>
+                    
+                    <div class="bloque-foto">
+                        <h3 class="titulo-foto">La maestra más linda</h3>
+                        <img src="maestra1.jpg" alt="La maestra más linda">
+                        <p class="texto-foto">Maestra, muchas gracias por todo, usted es una maestra muy linda y amable. Me dió mucho gusto que me diera clases una maestra como usted.</p>
+                    </div>
+
+                    <div class="bloque-foto">
+                        <h3 class="titulo-foto">La mejor maestra</h3>
+                        <img src="maestra2.jpg" alt="La mejor maestra">
+                        <p class="texto-foto">Usted es una maestra muy hermosa, única, inteligente, amable, tierna y muchas cosas que ni siquiera puedo describir porque las palabras se me quedan cortas.</p>
+                    </div>
+
+                </div>
+                <div class="flecha-anterior" id="btn-anterior-2"></div>
+                <div class="flecha-siguiente" id="btn-siguiente-2"></div>
+                <div class="numero-pagina">2</div>
+            </div>
+
+            <!-- MAESTRA PÁGINA 2: 2 FOTOS -->
+            <div class="pagina" data-pagina="3">
+                <div class="contenido-pagina">
+                    <h2>A Mi Maestra</h2>
+                    
+                    <div class="bloque-foto">
+                        <h3 class="titulo-foto">Mi mejor maestra</h3>
+                        <img src="maestra3.jpg" alt="Mi mejor maestra">
+                        <p class="texto-foto">Me encanta su forma de ser, quisiera tener la paciencia que usted tiene al tener que soportar nuestros comportamientos y actitudes. La queremos mucho maestra.</p>
+                    </div>
+
+                    <div class="bloque-foto">
+                        <h3 class="titulo-foto">Mi maestra más trabajadora</h3>
+                        <img src="maestra4.jpg" alt="Mi maestra más trabajadora">
+                        <p class="texto-foto">Muchas gracias por todo maestra, por soportar a cada uno de nosotros, la admiramos mucho maestra.</p>
+                    </div>
+
+                </div>
+                <div class="flecha-anterior" id="btn-anterior-3"></div>
+                <div class="flecha-siguiente" id="btn-siguiente-3"></div>
+                <div class="numero-pagina">3</div>
+            </div>
+
+            <!-- MAESTRA PÁGINA 3: 2 FOTOS -->
+            <div class="pagina" data-pagina="4">
+                <div class="contenido-pagina">
+                    <h2>A Mi Maestra</h2>
+                    
+                    <div class="bloque-foto">
+                        <h3 class="titulo-foto">La maestra más admirable</h3>
+                        <img src="maestra5.jpg" alt="La maestra más admirable">
+                        <p class="texto-foto">La quiero mucho maestra, la aprecio mucho. Me encanta como nos trata a pesar de las cosas malas que hemos hecho, me gustaría estar otros años más con usted y con todos mis compañeros.</p>
+                    </div>
+
+                    <div class="bloque-foto">
+                        <h3 class="titulo-foto">La más bonita</h3>
+                        <img src="maestra6.jpg" alt="La más bonita">
+                        <p class="texto-foto">La maestra más linda de todas, la más única, la más tierna, la más perfecta, la más admirable. Usted es una persona muy especial para mí y para todos nosotros, al igual que el maestro Jonathan. Usted es un ejemplo a seguir, le deseo lo mejor a usted y a cada uno de mis compañeros y a todos. Muchas gracias por todo maestra la quiero mucho.</p>
+                    </div>
+
+                </div>
+                <div class="flecha-anterior" id="btn-anterior-4"></div>
+                <div class="flecha-siguiente" id="btn-siguiente-4"></div>
+                <div class="numero-pagina">4</div>
+            </div>
+
+            <!-- COMPAÑEROS PÁGINA 1: 2 FOTOS -->
+            <div class="pagina" data-pagina="5">
+                <div class="contenido-pagina">
+                    <h2>A Mis Compañeros</h2>
+                    
+                    <div class="bloque-foto">
+                        <img src="companero1.jpg" alt="Compañero">
+                        <p class="texto-foto">Amigos, muchas gracias por todo, muchas gracias por los momentos felices que tuvimos en esos cortos 3 años juntos. Para mí son el mejor grupo que pude haber tenido.</p>
+                    </div>
+
+                    <div class="bloque-foto">
+                        <img src="companero2.jpg" alt="Compañero">
+                        <p class="texto-foto">Mis mejores amigos, hoy nos graduamos y se que es difícil aceptar eso pero así es la vida. Ustedes sigan estudiando, hagan el esfuerzo por mejorar.</p>
+                    </div>
+
+                </div>
+                <div class="flecha-anterior" id="btn-anterior-5"></div>
+                <div class="flecha-siguiente" id="btn-siguiente-5"></div>
+                <div class="numero-pagina">5</div>
+            </div>
+
+            <!-- COMPAÑEROS PÁGINA 2: 2 FOTOS -->
+            <div class="pagina" data-pagina="6">
+                <div class="contenido-pagina">
+                    <h2>A Mis Compañeros</h2>
+                    
+                    <div class="bloque-foto">
+                        <img src="companero3.jpg" alt="Compañeras">
+                        <p class="texto-foto">Mis amigas, son unas niñas muy lindas y admirables, me encanta su forma de ser de cada una de ellas, y no hablo solo de ellas. Hablo de todo el grupo.</p>
+                    </div>
+
+                    <div class="bloque-foto">
+                        <img src="companero4.jpg" alt="Amigo">
+                        <p class="texto-foto">Mi otro amigo, el es muy amable, chistoso, guapo, trabajador. El sabe hacer reír a todos, con cada cosa que dice me hace reír, es un gran amigo.</p>
+                    </div>
+
+                </div>
+                <div class="flecha-anterior" id="btn-anterior-6"></div>
+                <div class="flecha-siguiente" id="btn-siguiente-6"></div>
+                <div class="numero-pagina">6</div>
+            </div>
+
+            <!-- COMPAÑEROS PÁGINA 3: 2 FOTOS -->
+            <div class="pagina" data-pagina="7">
+                <div class="contenido-pagina">
+                    <h2>A Mis Compañeros</h2>
+                    
+                    <div class="bloque-foto">
+                        <img src="companero5.jpg" alt="Amigo">
+                        <p class="texto-foto">Otro amigo, este igual lo considero un hermano, igual que todos mis amigos. El es muy inteligente, amable, educado, el se preocupa por los demás.</p>
+                    </div>
+
+                    <div class="bloque-foto">
+                        <img src="companero6.jpg" alt="Amiga">
+                        <p class="texto-foto">Otra amiga que tengo, ella es muy amable, inteligente. Se lleva muy bien con todos, me cae super bien.</p>
+                    </div>
+
+                </div>
+                <div class="flecha-anterior" id="btn-anterior-7"></div>
+                <div class="flecha-siguiente" id="btn-siguiente-7"></div>
+                <div class="numero-pagina">7</div>
+            </div>
+
+            <!-- COMPAÑEROS PÁGINA 4: 2 FOTOS -->
+            <div class="pagina" data-pagina="8">
+                <div class="contenido-pagina">
+                    <h2>A Mis Compañeros</h2>
+                    
+                    <div class="bloque-foto">
+                        <img src="companero7.jpg" alt="Amiga">
+                        <p class="texto-foto">Otra amiga, ella es muy amable, inteligente, educada y más cosas.</p>
+                    </div>
+
+                    <div class="bloque-foto">
+                        <img src="companero8.jpg" alt="Amiga">
+                        <p class="texto-foto">Otra amiga que tengo, se que no hablamos mucho pero yo te considero una amiga, tu eres amable, inteligente, respetuosa.</p>
+                    </div>
+
+                </div>
+                <div class="flecha-anterior" id="btn-anterior-8"></div>
+                <div class="flecha-siguiente" id="btn-siguiente-8"></div>
+                <div class="numero-pagina">8</div>
+            </div>
+
+            <!-- COMPAÑEROS PÁGINA 5: 2 FOTOS -->
+            <div class="pagina" data-pagina="9">
+                <div class="contenido-pagina">
+                    <h2>A Mis Compañeros</h2>
+                    
+                    <div class="bloque-foto">
+                        <img src="companero9.jpg" alt="Amigas">
+                        <p class="texto-foto">Mi amiga, contigo me llevo súper bien, eres muy amable, inteligente, respetuosa, educada, admirable. Me encanta tu forma de ser, como te ríes de cualquier cosa.</p>
+                    </div>
+
+                    <div class="bloque-foto">
+                        <img src="companero10.jpg" alt="Amigo">
+                        <p class="texto-foto">Mi otra amiga, sabes aunque a veces nos llevamos pesado y así yo te quiero, eres inteligente, amable y otras cosas. Disculpa si te hago enojar a veces o siempre.</p>
+                    </div>
+
+                </div>
+                <div class="flecha-anterior" id="btn-anterior-9"></div>
+                <div class="flecha-siguiente" id="btn-siguiente-9"></div>
+                <div class="numero-pagina">9</div>
+            </div>
+
+            <!-- ÚLTIMA PÁGINA -->
+            <div class="pagina" data-pagina="10">
+                <div class="contenido-pagina">
+                    <h2>Despedida</h2>
+                    
+                    <div class="bloque-foto">
+                        <img src="companero11.jpg" alt="Amigos">
+                        <p class="texto-foto">Mis amigos, ustedes son muy inteligentes, amables y muchas cosas más.</p>
+                    </div>
+
+                    <div class="texto-final">
+Muchas felicidades amigos, estoy orgulloso de cada uno de ustedes, sigan estudiando quiero verlo cumplir sus metas. Este no es un adiós, es un hasta luego. Se que en algún momento nos volveremos a ver.
+
+Una disculpa a los que no pudieron aparecer aquí, no tengo fotos de todos ustedes, solo fotos grupales. Pero eso es más que suficiente. 
+
+Espero les guste y lo que les programe, hice lo mejor que pude con tal de que saliera bonito. No es lo mejor que pude hacer pero es difícil programar.
+
+Muchas felicidades y gracias por todo.
+                    </div>
+                </div>
+                <div class="flecha-anterior" id="btn-anterior-10"></div>
+                <div class="numero-pagina">10</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let paginaActual = 0;
+        const paginas = document.querySelectorAll('.pagina');
+        const totalPaginas = paginas.length;
+
+        function actualizarLibro() {
+            paginas.forEach((pagina, index) => {
+                pagina.classList.remove('activa');
+                if (index === paginaActual) {
+                    pagina.classList.add('activa');
+                }
+            });
+        }
+
+        function siguientePagina() {
+            if (paginaActual < totalPaginas - 1) {
+                paginaActual++;
+                actualizarLibro();
+            }
+        }
+
+        function anteriorPagina() {
+            if (paginaActual > 0) {
+                paginaActual--;
+                actualizarLibro();
+            }
+        }
+
+        // ARREGLO: Agregar event listeners a todos los botones
+        document.addEventListener('DOMContentLoaded', function() {
+            for(let i = 0; i < totalPaginas; i++) {
+                const btnSig = document.getElementById(`btn-siguiente-${i}`);
+                const btnAnt = document.getElementById(`btn-anterior-${i}`);
+                
+                if(btnSig) btnSig.addEventListener('click', siguientePagina);
+                if(btnAnt) btnAnt.addEventListener('click', anteriorPagina);
+            }
+            actualizarLibro();
+        });
+    </script>
+</body>
+</html>
